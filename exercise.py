@@ -60,7 +60,7 @@ class TurtleShell(cmd.Cmd):
 
     def do_record(self, arg):
         'Start recording macro.'
-        self.is_recording = True
+        self.recording = True
         self.macro = []
 
     def do_stop(self, arg):
