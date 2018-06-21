@@ -23,40 +23,77 @@ Rozwiązania wysyłamy tak samo, jak prework, tylko że w jednym Pull Requeście
 import cmd, sys
 import turtle
 
+
+class Command(object):
+    def __init__(self, function, args):
+        self.function = function
+        self.args = args
+
+    def execute(self):
+        self.function(*self.args)
+
 class TurtleShell(cmd.Cmd):
     intro = 'Welcome to the turtle shell.   Type help or ? to list commands.\n'
     prompt = '(turtle) '
 
+    def __init__(self):
+        super().__init__()
+        self.macro = []
+        self.recording = False
+
     # ----- basic turtle commands -----
     def do_forward(self, arg):
-        'Move the turtle forward by the specified distance:  FORWARD 10'
-        turtle.forward(int(arg))
+        self.run_command(Command(turtle.forward, self.parse(arg)))
+
+
     def do_right(self, arg):
-        'Turn turtle right by given number of degrees:  RIGHT 20'
-        turtle.right(int(arg))
+        self.run_command(Command(turtle.right, self.parse(arg)))
+
     def do_left(self, arg):
-        'Turn turtle left by given number of degrees:  LEFT 90'
-        turtle.left(int(arg))
+        self.run_command(Command(turtle.left, self.parse(arg)))
+
     def do_home(self, arg):
-        'Return turtle to the home position:  HOME'
-        turtle.home()
+        self.run_command(Command(turtle.home))
+
     def do_circle(self, arg):
-        'Draw circle with given radius an options extent and steps:  CIRCLE 50'
-        turtle.circle(int(arg))
-    def do_position(self, arg):
-        'Print the current turtle position:  POSITION'
-        print('Current position is %d %d\n' % turtle.position())
-    def do_heading(self, arg):
-        'Print the current turtle heading in degrees:  HEADING'
-        print('Current heading is %d\n' % (turtle.heading(),))
+        self.run_command(Command(turtle.circle, self.parse(arg)))
+
+    def do_record(self, arg):
+        'Start recording macro.'
+        self.is_recording = True
+        self.macro = []
+
+    def do_stop(self, arg):
+        'Stop recording macro.'
+        self.is_recording = False
+
+    def do_playback(self, arg):
+        'Execute macro.'
+        for cmd in self.macro:
+            cmd.execute()
+
+    #def do_position(self, arg):
+    #    print('Current position is %d %d\n' % turtle.position())
+
+    # def do_heading(self, arg):
+    #    print('Current heading is %d\n' % (turtle.heading(),))
+
     def do_reset(self, arg):
-        'Clear the screen and return turtle to center:  RESET'
         turtle.reset()
+
     def do_bye(self, arg):
-        'Close the turtle window, and exit:  BYE'
         print('Thank you for using Turtle')
         turtle.bye()
-        return True
+        return
+
+    def run_command(self, command):
+        if self.is_recording:
+            self.macro.append(command)
+        command.execute()
+
+    def parse(self, arg):
+        return tuple(map(int, arg.split()))
+
 
 if __name__ == '__main__':
     TurtleShell().cmdloop()    
